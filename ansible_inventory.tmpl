@@ -1,0 +1,6 @@
+all:
+  children:
+    test_node:
+      hosts:
+        ${instance_dns}:
+          ansible_user: ubuntu
