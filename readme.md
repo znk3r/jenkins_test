@@ -7,9 +7,9 @@ Terraform requires 3 variables to run:
 | Variable | Type | Dev value |
 | --- | --- | --- |
 | environment_tag | string | dev |
-| private_subnet_id | string | subnet-09d9054bb5cd4e5db |
-| ssh_key_pair_name | string | ansible-runner-nonprod |
-| ssh_security_group_name | string | devnet-dev-ssh-destination |
+| private_subnet_id | string | subnet-000000000000000 |
+| ssh_key_pair_name | string | dev-ssh-key-pair |
+| ssh_security_group_name | string | dev-ssh-destination |
 
 Then run:
 
