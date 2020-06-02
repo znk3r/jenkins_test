@@ -81,11 +81,13 @@ echo \"${TF_BACKEND}\" > backend.tf
             }
         }
         stage('Run ansible') {
-            ansiblePlaybook(
-                credentialsId: 'private_key',
-                inventory: 'ansible/inventory.yml', 
-                playbook: 'ansible/playbook.yml'
-            )
+            steps {
+                ansiblePlaybook(
+                    credentialsId: 'private_key',
+                    inventory: 'ansible/inventory.yml', 
+                    playbook: 'ansible/playbook.yml'
+                )
+            }
         }
     }
     post {
