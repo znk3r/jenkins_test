@@ -52,12 +52,12 @@ data "aws_vpc" "main_vpc" {
 }
 
 resource "aws_security_group" "test_instance_sg" {
-  name        = join("-", [ "test", var.environment_name, "sg" ]
+  name        = join("-", [ "test", var.environment_name, "sg" ])
   description = "Security group to allow ssh access"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name         = join("-", [ "test", var.environment_name, "sg" ]
+    Name         = join("-", [ "test", var.environment_name, "sg" ])
     ManagedBy    = "terraform"
     Project      = "Testing"
     Environment  = var.environment_tag
@@ -73,7 +73,7 @@ resource "aws_security_group" "test_instance_sg" {
 }
 
 resource "aws_instance" "test" {
-  ami           = "${data.aws_ami.ubuntu.id}"
+  ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   key_name  = var.ssh_key_pair_name
   subnet_id = data.aws_subnet.main_subnet.id
@@ -82,7 +82,7 @@ resource "aws_instance" "test" {
   ]
 
   tags = {
-    Name         = join("-", [ "test", var.environment_name, "ubuntu" ]
+    Name         = join("-", [ "test", var.environment_name, "ubuntu" ])
     ManagedBy    = "terraform"
     Project      = "Testing"
     Environment  = var.environment_tag
