@@ -43,8 +43,8 @@ echo \"${TF_BACKEND}\" > backend.tf
                 AWS_DEFAULT_REGION = 'us-west-2'
             }
             steps {
-                sh 'terraform init'
-                sh 'terraform plan -out myplan'
+                sh 'terraform init -no-color'
+                sh 'terraform plan -no-color -out myplan'
             }
         }
         stage('Terraform approval') {
@@ -72,7 +72,7 @@ echo \"${TF_BACKEND}\" > backend.tf
                 AWS_DEFAULT_REGION = 'us-west-2'
             }
             steps {
-                sh 'terraform apply -input=false myplan'
+                sh 'terraform apply -no-color -input=false myplan'
             }
         }
         stage('Configure ansible') {
