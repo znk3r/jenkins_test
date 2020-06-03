@@ -83,7 +83,7 @@ echo \"${TF_BACKEND}\" > backend.tf
         stage('Run ansible') {
             steps {
                 ansiblePlaybook(
-                    credentialsId: 'private_key',
+                    credentialsId: 'jenkins-test-private-key',
                     inventory: 'ansible/inventory.yml', 
                     playbook: 'ansible/playbook.yml'
                 )

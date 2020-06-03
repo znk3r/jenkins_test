@@ -2,8 +2,18 @@ provider "aws" {
   region = "us-west-2"
 }
 
+variable "environment_name" {
+  description = "Unique name for the environment"
+  type        = string
+}
+
 variable "environment_tag" {
   description = "Tag for the name of the environment"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "ID of the VPC where the resources are created"
   type        = string
 }
 
@@ -14,11 +24,6 @@ variable "private_subnet_id" {
 
 variable "ssh_key_pair_name" {
   description = "Default EC2 key pair which will have ssh access to all the instances. Check documentation to see which key pair use on each VPC."
-  type        = string
-}
-
-variable "ssh_security_group_name" {
-  description = "Name of the security group allowing ssh connections from the same VPC"
   type        = string
 }
 
@@ -42,8 +47,29 @@ data "aws_subnet" "main_subnet" {
   id = var.private_subnet_id
 }
 
-data "aws_security_group" "ssh_security_group" {
-  name = var.ssh_security_group_name
+data "aws_vpc" "main_vpc" {
+  id = "${var.vpc_id}"
+}
+
+resource "aws_security_group" "test_instance_sg" {
+  name        = join("-", [ "test", var.environment_name, "sg" ]
+  description = "Security group to allow ssh access"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name         = join("-", [ "test", var.environment_name, "sg" ]
+    ManagedBy    = "terraform"
+    Project      = "Testing"
+    Environment  = var.environment_tag
+  }
+
+  ingress {
+    description = "Allow ssh access from inside VPC"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = data.aws_vpc.main_vpc.cidr_block
+  }
 }
 
 resource "aws_instance" "test" {
@@ -52,11 +78,11 @@ resource "aws_instance" "test" {
   key_name  = var.ssh_key_pair_name
   subnet_id = data.aws_subnet.main_subnet.id
   vpc_security_group_ids = [
-    data.aws_security_group.ssh_security_group.id,
+    aws_security_group.test_instance_sg.id,
   ]
 
   tags = {
-    Name         = "ubuntu-test"
+    Name         = join("-", [ "test", var.environment_name, "ubuntu" ]
     ManagedBy    = "terraform"
     Project      = "Testing"
     Environment  = var.environment_tag

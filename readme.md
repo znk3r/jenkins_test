@@ -6,10 +6,11 @@ Terraform requires 3 variables to run:
 
 | Variable | Type | Dev value |
 | --- | --- | --- |
+| environment_name | string | my-env |
 | environment_tag | string | dev |
+| vpc_id | string | vpc-000000000000000 |
 | private_subnet_id | string | subnet-000000000000000 |
 | ssh_key_pair_name | string | dev-ssh-key-pair |
-| ssh_security_group_name | string | dev-ssh-destination |
 
 Then run:
 
