@@ -1,4 +1,5 @@
 - hosts: test_node
+  gather_facts: yes
   
   tasks:
     - name: Read variables
