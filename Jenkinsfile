@@ -89,7 +89,7 @@ echo \"${TF_BACKEND}\" > backend.tf
                     credentialsId: 'jenkins-test-private-key',
                     inventory: 'ansible/inventory.yml', 
                     playbook: 'ansible/playbook.yml',
-                    hostKeyChecking: false
+                    hostKeyChecking: false,
                     colorized: true
                 )
             }
