@@ -56,7 +56,7 @@ echo \"${TF_BACKEND}\" > backend.tf
                         parameters: [
                             [
                                 $class: 'BooleanParameterDefinition', 
-                                defaultValue: false, 
+                                defaultValue: true, 
                                 description: 'Apply terraform', 
                                 name: 'confirm'
                             ] 
@@ -81,11 +81,15 @@ echo \"${TF_BACKEND}\" > backend.tf
             }
         }
         stage('Run ansible') {
+            environment {
+                ANSIBLE_HOST_KEY_CHECKING = false
+            }
             steps {
                 ansiblePlaybook(
                     credentialsId: 'jenkins-test-private-key',
                     inventory: 'ansible/inventory.yml', 
                     playbook: 'ansible/playbook.yml',
+                    hostKeyChecking: false
                     colorized: true
                 )
             }
