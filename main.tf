@@ -12,6 +12,16 @@ variable "environment_tag" {
   type        = string
 }
 
+variable "owner" {
+  description = "Value for the owner tag"
+  type        = string
+}
+
+variable "team" {
+  description = "Value for the team tag"
+  type        = string
+}
+
 variable "vpc_id" {
   description = "ID of the VPC where the resources are created"
   type        = string
@@ -59,6 +69,8 @@ resource "aws_security_group" "test_instance_sg" {
   tags = {
     Name         = join("-", [ "test", var.environment_name, "sg" ])
     ManagedBy    = "terraform"
+    Owner        = var.owner
+    Team         = var.team
     Project      = "Testing"
     Environment  = var.environment_tag
   }
@@ -84,6 +96,8 @@ resource "aws_instance" "test" {
   tags = {
     Name         = join("-", [ "test", var.environment_name, "ubuntu" ])
     ManagedBy    = "terraform"
+    Owner        = var.owner
+    Team         = var.team
     Project      = "Testing"
     Environment  = var.environment_tag
   }
