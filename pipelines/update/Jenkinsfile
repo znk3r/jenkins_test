@@ -23,6 +23,11 @@ pipeline {
             description: "Base SSM parameter store namespace where configurations are stored."
         )
     }
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('jenkins-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('jenkins-secret-key')
+        AWS_DEFAULT_REGION = 'us-west-2'
+    }
     stages {
         stage('Retrieve code') {
             steps {
@@ -43,11 +48,6 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.backe
             }
         }
         stage('Terraform plan') {
-            environment {
-                AWS_ACCESS_KEY_ID = credentials('jenkins-access-key-id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins-secret-key')
-                AWS_DEFAULT_REGION = 'us-west-2'
-            }
             steps {
                 sh 'terraform init -no-color'
                 sh """terraform plan -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
@@ -72,11 +72,6 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.backe
             }
         }
         stage('Terraform apply') {
-            environment {
-                AWS_ACCESS_KEY_ID = credentials('jenkins-access-key-id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins-secret-key')
-                AWS_DEFAULT_REGION = 'us-west-2'
-            }
             steps {
                 sh 'terraform apply -no-color -input=false myplan'
             }
