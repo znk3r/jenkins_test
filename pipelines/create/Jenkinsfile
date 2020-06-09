@@ -1,0 +1,48 @@
+currentBuild.displayName = "#${BUILD_NUMBER}"
+currentBuild.description = "Create new testing app environment"
+
+pipeline {
+    agent {
+        label 'provisioner'
+    }
+    options {
+        timestamps()
+    }
+    parameters {
+        choice(
+            name: 'ENVIRONMENT', 
+            choices: ['dev', 'uat'], 
+            description: 'Choose environment'
+        )
+        text(
+            name: "ENV_NAME",
+            description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
+        )
+        text(
+            name: "ENV_OWNER",
+            description: "Name and email of the person deploying the environment. Must follow format 'Name Surname - email@dns.com'"
+        )
+        text(
+            name: "ENV_TEAM",
+            description: "Name of the team in charge of the resource"
+        )
+        text(
+            name: "FILE_NAME",
+            defaultValue: "test-file.txt",
+            description: "Name of the temporal file which will be created in the instance."
+        )
+    }
+    stages {
+        stage('Create terraform vars') {
+            steps {
+
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
+

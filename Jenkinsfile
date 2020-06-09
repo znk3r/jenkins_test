@@ -14,11 +14,11 @@ pipeline {
             choices: ['dev', 'uat'],
             description: 'Choose environment'
         )
-        text(
+        string(
             name: "ENV_NAME",
             description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
         )
-        text(
+        string(
             name: "PARAMETER_STORE_NAMESPACE",
             description: "Base SSM parameter store namespace where configurations are stored."
         )
