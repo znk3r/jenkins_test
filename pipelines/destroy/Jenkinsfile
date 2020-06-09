@@ -1,5 +1,5 @@
 currentBuild.displayName = "#${BUILD_NUMBER}"
-currentBuild.description = "Deploy testing app environment"
+currentBuild.description = "Destroy testing app environment"
 
 pipeline {
     agent {
@@ -21,6 +21,11 @@ pipeline {
         string(
             name: "PARAMETER_STORE_NAMESPACE",
             description: "Base SSM parameter store namespace where configurations are stored."
+        )
+        booleanParam(
+            name: "REMOVE_CONFIGURATION",
+            defaultValue: true,
+            description: "This option will remove all the configuration files stored in parameter store."
         )
     }
     environment {
@@ -47,10 +52,10 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
                 """
             }
         }
-        stage('Terraform plan') {
+        stage('Terraform plan destroy') {
             steps {
                 sh 'terraform init -no-color'
-                sh """terraform plan -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
+                sh """terraform plan --destroy -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
             }
         }
         stage('Terraform approval') {
@@ -58,7 +63,7 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
                 script {
                     def userInput = input(
                         id: 'confirm', 
-                        message: 'Do you want to apply these changes?', 
+                        message: 'Do you want to apply these changes and destroy the environment?', 
                         parameters: [
                             [
                                 $class: 'BooleanParameterDefinition', 
@@ -71,30 +76,15 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
                 }
             }
         }
-        stage('Terraform apply') {
+        stage('Terraform destroy') {
             steps {
                 sh 'terraform apply -no-color -input=false myplan'
             }
         }
-        stage('Configure ansible') {
+        stage('Clean up configuration') {
             steps {
-                sh """set +e;
-aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" --output json | jq .Parameter.Value -r > ansible/vars.yml
-                """
-            }
-        }
-        stage('Run ansible') {
-            environment {
-                ANSIBLE_HOST_KEY_CHECKING = false
-            }
-            steps {
-                ansiblePlaybook(
-                    credentialsId: 'jenkins-test-private-key',
-                    inventory: 'ansible/inventory.yml', 
-                    playbook: 'ansible/playbook.yml',
-                    hostKeyChecking: false,
-                    colorized: true
-                )
+                sh 'aws ssm delete-parameter --name "${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars"'
+                sh 'aws ssm delete-parameter --name "${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml"'
             }
         }
     }
