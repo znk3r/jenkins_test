@@ -29,11 +29,6 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-west-2'
     }
     stages {
-        stage('Retrieve code') {
-            steps {
-                git 'https://github.com/znk3r/jenkins_test'
-            }
-        }
         stage('Configure terraform') {
             steps {
                 sh """set +e;
