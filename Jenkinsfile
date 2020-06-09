@@ -9,17 +9,18 @@ pipeline {
         timestamps()
     }
     parameters {
-        text(
-            name: "TFVARS",
-            description: "Contents of the tfvars file to run terraform"
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'uat'],
+            description: 'Choose environment'
         )
         text(
-            name: "TF_BACKEND",
-            description: "Contents of the backend.tf file"
+            name: "ENV_NAME",
+            description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
         )
         text(
-            name: "ANSIBLE_CONF",
-            description: "Contents of the ansible yaml configuration"
+            name: "PARAMETER_STORE_NAMESPACE",
+            description: "Base SSM parameter store namespace where configurations are stored."
         )
     }
     stages {
@@ -31,8 +32,13 @@ pipeline {
         stage('Configure terraform') {
             steps {
                 sh """set +e;
-echo \"${TFVARS}\" > terraform.tfvars
-echo \"${TF_BACKEND}\" > backend.tf
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.tfvars\" --output json | jq .Parameter.Value -r > ${ENVIRONMENT}.tfvars
+                """
+                sh """set +e;
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars\" --output json | jq .Parameter.Value -r > project.tfvars
+                """
+                sh """set +e;
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.backend.tf\" --output json | jq .Parameter.Value -r > backend.tf
                 """
             }
         }
@@ -44,7 +50,7 @@ echo \"${TF_BACKEND}\" > backend.tf
             }
             steps {
                 sh 'terraform init -no-color'
-                sh 'terraform plan -no-color -out myplan'
+                sh """terraform plan -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
             }
         }
         stage('Terraform approval') {
@@ -77,7 +83,9 @@ echo \"${TF_BACKEND}\" > backend.tf
         }
         stage('Configure ansible') {
             steps {
-                sh """echo \"${ANSIBLE_CONF}\" > ansible/vars.yml"""
+                sh """set +e;
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" --output json | jq .Parameter.Value -r > ansible/vars.yml
+                """
             }
         }
         stage('Run ansible') {
