@@ -34,11 +34,6 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-west-2'
     }
     stages {
-        stage('Retrieve code') {
-            steps {
-                git 'https://github.com/znk3r/jenkins_test'
-            }
-        }
         stage('Configure terraform') {
             steps {
                 sh """set +e;
@@ -56,22 +51,10 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
             steps {
                 sh 'terraform init -no-color'
                 sh """terraform plan --destroy -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
-            }
-        }
-        stage('Terraform approval') {
-            steps {
                 script {
                     def userInput = input(
                         id: 'confirm', 
-                        message: 'Do you want to apply these changes and destroy the environment?', 
-                        parameters: [
-                            [
-                                $class: 'BooleanParameterDefinition', 
-                                defaultValue: true, 
-                                description: 'Apply terraform', 
-                                name: 'confirm'
-                            ] 
-                        ]
+                        message: 'Do you want to apply these changes and destroy the environment?'
                     )
                 }
             }
@@ -82,6 +65,9 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
             }
         }
         stage('Clean up configuration') {
+            when {
+                expression { return params.REMOVE_CONFIGURATION }
+            }
             steps {
                 sh 'aws ssm delete-parameter --name "${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars"'
                 sh 'aws ssm delete-parameter --name "${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml"'
