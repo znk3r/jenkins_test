@@ -1,5 +1,5 @@
 currentBuild.displayName = "#${BUILD_NUMBER}"
-currentBuild.description = "Deploy testing app environment"
+currentBuild.description = "Update ${ENV_NAME} (${ENVIRONMENT})"
 
 pipeline {
     agent {

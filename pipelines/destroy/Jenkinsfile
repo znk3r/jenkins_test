@@ -1,5 +1,5 @@
 currentBuild.displayName = "#${BUILD_NUMBER}"
-currentBuild.description = "Destroy testing app environment"
+currentBuild.description = "Destroy ${ENV_NAME} (${ENVIRONMENT})"
 
 pipeline {
     agent {
