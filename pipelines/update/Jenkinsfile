@@ -51,22 +51,10 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
             steps {
                 sh 'terraform init -no-color'
                 sh """terraform plan -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
-            }
-        }
-        stage('Terraform approval') {
-            steps {
                 script {
                     def userInput = input(
                         id: 'confirm', 
-                        message: 'Do you want to apply these changes?', 
-                        parameters: [
-                            [
-                                $class: 'BooleanParameterDefinition', 
-                                defaultValue: true, 
-                                description: 'Apply terraform', 
-                                name: 'confirm'
-                            ] 
-                        ]
+                        message: 'Do you want to apply these changes?'
                     )
                 }
             }
