@@ -35,7 +35,7 @@ pipeline {
                 ok "Send"
                 parameters {
                     string(name: "OWNER", description: "Person who owns the resource. Must be full name and email following format 'Name Surname - me@domain.com'.")
-                    choice(name: "TEAM", choices: ['spartans', 'strawhats', 'pzl', 'armed'] description: "Team in charge of the environment.")
+                    choice(name: "TEAM", choices: ['spartans', 'strawhats', 'pzl', 'armed'], description: "Team in charge of the environment.")
                     string(name: "FILENAME", description: "New file to create inside the instance as part of the ansible playbook.")
                 }
             }
