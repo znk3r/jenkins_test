@@ -51,14 +51,14 @@ pipeline {
                 sh """aws ssm put-parameter \
 --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars\" \
 --description \"Terraform tfvars for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
---value file://${ENV_NAME}.tfvars\" \
+--value file://${ENV_NAME}.tfvars \
 --tags '[{"Key":"Name","Value":"${ENVIRONMENT}-${ENV_NAME}-tfvars"},{"Key":"Environment", "Value":"${ENVIRONMENT}"}]'
 --type String --overwrite
 """
                 sh """aws ssm put-parameter \
 --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" \
 --description \"Ansible config for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
---value file://${ENV_NAME}.yaml\" \
+--value file://${ENV_NAME}.yaml \
 --tags '[{"Key":"Name","Value":"${ENVIRONMENT}-${ENV_NAME}-ansible"},{"Key":"Environment", "Value":"${ENVIRONMENT}"}]'
 --type String --overwrite
 """
