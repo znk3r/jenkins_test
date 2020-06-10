@@ -29,18 +29,46 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-west-2'
     }
     stages {
-        stage('Validate extra params') {
+        stage('Create environment configuration') {
             input {
-                message "Need some extra info"
+                message "Please, configure the environment"
                 ok "Send"
                 parameters {
-                    string(name: "OWNER", description: "Resource owner")
-                    string(name: "TEAM", description: "Resource team")
+                    string(name: "OWNER", description: "Person who owns the resource. Must be full name and email following format 'Name Surname - me@domain.com'.")
+                    choice(name: "TEAM", choices: ['spartans', 'strawhats', 'pzl', 'armed'] description: "Team in charge of the environment.")
+                    string(name: "FILENAME", description: "New file to create inside the instance as part of the ansible playbook.")
                 }
             }
             steps {
-                echo "Owner: ${OWNER}"
-                echo "Team: ${TEAM}"
+                sh "pipelines/create/create_tfvars.sh > ${ENV_NAME}.tfvars"
+                sh "pipelines/create/create_ansible_yaml.sh > ${ENV_NAME}.yaml"
+            }
+        }
+        stage('Store environment configuration') {
+            steps {
+                sh """aws ssm put-parameter \
+--name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars\" \
+--description \"Terraform tfvars for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
+--value file://${ENV_NAME}.tfvars\" \
+--tags '[{"Key":"Name","Value":"${ENVIRONMENT}-${ENV_NAME}-tfvars"},{"Key":"Environment", "Value":"${ENVIRONMENT}"},{"Key":"Owner", "Value":"${OWNER}"},{"Key":"Team", "Value":"${TEAM}"}]'
+--type String --overwrite
+"""
+                sh """aws ssm put-parameter \
+--name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" \
+--description \"Ansible config for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
+--value file://${ENV_NAME}.yaml\" \
+--tags '[{"Key":"Name","Value":"${ENVIRONMENT}-${ENV_NAME}-ansible"},{"Key":"Environment", "Value":"${ENVIRONMENT}"},{"Key":"Owner", "Value":"${OWNER}"},{"Key":"Team", "Value":"${TEAM}"}]'
+--type String --overwrite
+"""
+            }
+        }
+        stage('Invoke update pipeline') {
+            steps {
+                build job: 'Update environment', parameters: [
+                    string(name: 'ENVIRONMENT', value: "${ENVIRONMENT}"),
+                    string(name: 'ENV_NAME', value: "${ENV_NAME}"),
+                    string(name: 'PARAMETER_STORE_NAMESPACE', value: "${PARAMETER_STORE_NAMESPACE}")
+                ]
             }
         }
     }
@@ -50,4 +78,3 @@ pipeline {
         }
     }
 }
-
