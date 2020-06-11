@@ -80,18 +80,16 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
         }
         stage('Wait until instance is up') {
             steps {
-                step {
-                    INSTANCE_ID = sh(script: 'terraform output instance_id', returnStdout: true).trim()
-                    timeout(time: 10, unit: 'MINUTES') {
-                        waitUntil {
-                            try {
-                                return sh(
-                                    script: "aws ec2 describe-instance-status --instace-ids ${INSTANCE_ID} | jq \".InstanceStatuses[0].InstanceStatus.Status\" -r", 
-                                    returnStdout: true
-                                ).trim() == 'ok'
-                            } catch (exception) {
-                                return false
-                            }
+                def INSTANCE_ID = sh(script: 'terraform output instance_id', returnStdout: true).trim()
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitUntil {
+                        try {
+                            return sh(
+                                script: "aws ec2 describe-instance-status --instace-ids ${INSTANCE_ID} | jq \".InstanceStatuses[0].InstanceStatus.Status\" -r", 
+                                returnStdout: true
+                            ).trim() == 'ok'
+                        } catch (exception) {
+                            return false
                         }
                     }
                 }
