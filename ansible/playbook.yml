@@ -5,17 +5,26 @@
       include_vars:
         file: vars.yml
 
-    - name: Create file
+    - name: Create file /etc/os-release to /tmp/{{ file_name }}
       copy:
         src: /etc/os-release
         dest: /tmp/{{ file_name }}
 
-    - name: Check file
+    - name: Get stats for /tmp/{{ file_name }}
       stat:
         path: /tmp/{{ file_name }}
       register: st
     
-    - name: File checksum
+    - name: Show file checksum
       debug:
         var: st.stat.checksum
       
+    - name: Install nano
+      package:
+        name: nano
+        state: present
+
+    - name: Install docker
+      package:
+        name: docker
+        state: present
