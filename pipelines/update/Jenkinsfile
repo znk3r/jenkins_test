@@ -86,7 +86,7 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
                         waitUntil {
                             try {
                                 return sh(
-                                    script: "aws ec2 describe-instance-status --instace-ids ${instance_id} | jq \".InstanceStatuses[0].InstanceStatus.Status\" -r", 
+                                    script: "aws ec2 describe-instance-status --instance-ids ${instance_id} | jq \".InstanceStatuses[0].InstanceStatus.Status\" -r", 
                                     returnStdout: true
                                 ).trim() == 'ok'
                             } catch (exception) {
