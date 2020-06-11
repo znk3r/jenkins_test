@@ -19,6 +19,11 @@
       debug:
         var: st.stat.checksum
       
+    - name: Update packages
+      apt:
+        update_cache: true
+      become: true
+
     - name: Install nano
       package:
         name: nano
