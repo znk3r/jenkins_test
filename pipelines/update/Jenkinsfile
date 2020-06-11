@@ -22,6 +22,11 @@ pipeline {
             name: "PARAMETER_STORE_NAMESPACE",
             description: "Base SSM parameter store namespace where configurations are stored."
         )
+        booleanParam(
+            name: "WAIT_APPROVAL",
+            defaultValue: true,
+            description: "Wait for approval?"
+        )
     }
     environment {
         AWS_ACCESS_KEY_ID = credentials('jenkins-access-key-id')
@@ -46,6 +51,13 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
             steps {
                 sh 'terraform init'
                 sh "terraform plan -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"
+            }
+        }
+        stage('Approval') {
+            when {
+                expression { return params.WAIT_APPROVAL }
+            }
+            steps {
                 script {
                     def userInput = input(
                         id: 'confirm', 

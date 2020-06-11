@@ -67,7 +67,8 @@ pipeline {
                 build job: 'Update environment', parameters: [
                     string(name: 'ENVIRONMENT', value: "${ENVIRONMENT}"),
                     string(name: 'ENV_NAME', value: "${ENV_NAME}"),
-                    string(name: 'PARAMETER_STORE_NAMESPACE', value: "${PARAMETER_STORE_NAMESPACE}")
+                    string(name: 'PARAMETER_STORE_NAMESPACE', value: "${PARAMETER_STORE_NAMESPACE}"),
+                    string(name: 'WAIT_APPROVAL', value: false)
                 ]
             }
         }
