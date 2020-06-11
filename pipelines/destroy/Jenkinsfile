@@ -49,8 +49,8 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
         }
         stage('Terraform plan destroy') {
             steps {
-                sh 'terraform init -no-color'
-                sh """terraform plan --destroy -no-color -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
+                sh 'terraform init'
+                sh """terraform plan --destroy -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"""
                 script {
                     def userInput = input(
                         id: 'confirm', 
@@ -61,7 +61,7 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
         }
         stage('Terraform destroy') {
             steps {
-                sh 'terraform apply -no-color -input=false myplan'
+                sh 'terraform apply -input=false myplan'
             }
         }
         stage('Clean up configuration') {
