@@ -80,7 +80,7 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
         }
         stage('Wait until instance is up') {
             steps {
-                step {
+                script {
                     instance_id = sh(script: 'terraform output instance_id', returnStdout: true).trim()
                     timeout(time: 10, unit: 'MINUTES') {
                         waitUntil {
