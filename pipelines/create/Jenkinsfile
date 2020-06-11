@@ -68,7 +68,7 @@ pipeline {
                     string(name: 'ENVIRONMENT', value: "${ENVIRONMENT}"),
                     string(name: 'ENV_NAME', value: "${ENV_NAME}"),
                     string(name: 'PARAMETER_STORE_NAMESPACE', value: "${PARAMETER_STORE_NAMESPACE}"),
-                    booleanParam(name: 'WAIT_APPROVAL', value: false)
+                    boolean(name: 'WAIT_APPROVAL', value: false)
                 ]
             }
         }
