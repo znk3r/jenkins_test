@@ -25,12 +25,12 @@
         state: present
       become: true
 
-    - name: Install fortune
+    - name: Improve cowsay
       package:
-        name: fortune-mod
+        name: cowsay
         state: present
       become: true
 
-    - name: Get cookie
+    - name: Print something
       shell:
-        cmd: fortune
+        cmd: cowsay "This is the end"
