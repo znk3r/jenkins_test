@@ -110,4 +110,6 @@ resource "local_file" "ansible_inventory" {
   })
 }
 
-
+output instance_id {
+  value = aws_instance.test.id
+}
