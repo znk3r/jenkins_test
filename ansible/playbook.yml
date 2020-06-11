@@ -1,6 +1,10 @@
 - hosts: test_node
   
   tasks:
+    - name: Waits until remote system is usable
+      wait_for_connection:
+        sleep: 5
+
     - name: Read variables
       include_vars:
         file: vars.yml
