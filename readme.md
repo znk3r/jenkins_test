@@ -1,16 +1,33 @@
 # Pipeline testing example
 
+This is only a quick/dirty proof of concept to validate a provisioning workflow from Jenkins.
+
+The goal is to be able to create, update and destroy full environments from Jenkins. These environments are created in AWS with Terraform, and configured with Ansible.
+
+When a new environment is created, we stored the configuration used (`backend.tf` and `*.tfvars`) in parameter store, but any other storave system could be used as a replacement. When the environment is going to be updated, we retrieve and use those configuration. When the environment is destroyed, we delete the configuration files.
+
+Part of the requirements is to be able to create multiple instances of the application on the same environment. For example, there are 5 developers, and each one creates their own dev environment in AWS, or a different UAT environment is created to validate each feature with the client/stake holder. This is more complex than just doing deployments in pre-defined and fixed environments like SIT, Staging or Production.
+
+There are a lot of improvements to be done:
+
+- Validation of the provided values.
+- Validation of the provisioned environment (run basic tests)
+- A way to edit an existing environment from Jenkins, without doing it directly to parameter store; or
+- A way to reuse the create pipeline for editing an existing environment. This could be done loading the existing values as default values if the environment already exists.
+
 ## Terraform
 
-Terraform requires 3 variables to run:
+Terraform requires some variables to create the environment. Some of these variables are common for all the instances created in the same environment (like VPC, subnets and SSH keys)
 
-| Variable | Type | Dev value |
+| Variable | Dev value | Notes |
 | --- | --- | --- |
-| environment_name | string | my-env |
-| environment_tag | string | dev |
-| vpc_id | string | vpc-000000000000000 |
-| private_subnet_id | string | subnet-000000000000000 |
-| ssh_key_pair_name | string | dev-ssh-key-pair |
+| environment_name | my-env | Unique name for the environment you are provisioning. |
+| owner | Name Surname - email@domain.com | Information about the environment owner. |
+| team | Rocket Team | Name of the team supporting the environment. |
+| environment_tag | dev | Environment type: dev, uat, sit, stg, prod. |
+| vpc_id | vpc-000000000000000 | AWS VPC ID. This value is common for all environments of the same type. |
+| private_subnet_id | subnet-000000000000000 | AWS subnet ID. This value is common for all environments of the same type. |
+| ssh_key_pair_name | dev-ssh-key-pair | SSH key pair to use for the EC2 instance, ansible needs access to the private key to be able to SSH inside, so this keypair needs to be fixed for the environment and known by Jenkins |
 
 Then run:
 
