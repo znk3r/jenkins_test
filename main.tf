@@ -94,7 +94,7 @@ resource "aws_instance" "test" {
   ]
 
   tags = {
-    Name         = join("-", [ "test", var.environment_name, "ubuntu" ])
+    Name         = join("-", [ var.environment_tag, var.environment_name, "test-ubuntu" ])
     ManagedBy    = "terraform"
     Owner        = var.owner
     Team         = var.team
