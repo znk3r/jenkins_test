@@ -8,12 +8,14 @@ When a new environment is created, we stored the configuration used (`backend.tf
 
 Part of the requirements is to be able to create multiple instances of the application on the same environment. For example, there are 5 developers, and each one creates their own dev environment in AWS, or a different UAT environment is created to validate each feature with the client/stake holder. This is more complex than just doing deployments in pre-defined and fixed environments like SIT, Staging or Production.
 
-There are a lot of improvements to be done:
+### Possible improvements
 
-- Validation of the provided values.
-- Validation of the provisioned environment (run basic tests)
-- A way to edit an existing environment from Jenkins, without doing it directly to parameter store; or
-- A way to reuse the create pipeline for editing an existing environment. This could be done loading the existing values as default values if the environment already exists.
+- Waiting for the EC2 instance to be up and ssh accessible can be improved. At the moment, is dependent on AWS instance checks and can take several minutes, but you can ssh into the instance a lot sooner. This check should be replaced with a ssh connectivity check instead, but to achieve that the instance needs better tagging.
+- Input values for environment creation could be retrieved dynamically from a configuration file. The same configuration file could include validation checks for the input.
+- Pipeline should fail if the retrieval from parameter store fails. At the moment, the pipeline continues even when we don't have the configuration file. This PoC needs better error handling.
+- Another pipeline can be created to run validation checks on the new environment (Kitchen, InSpec, ServerSpec or similar). This pipeline would be called after each execution of the update pipeline.
+- Calling the create pipeline for an existing environment should retrieve the configuration from parameter store, and load the values as defaults for the input parameters. This could provide an easy way to edit an existing environment.
+- Evaluating use of vault instead of parameter store for secrets.
 
 ## Terraform
 
