@@ -1,5 +1,5 @@
 currentBuild.displayName = "#${BUILD_NUMBER}"
-currentBuild.description = "Update ${ENV_NAME} (${ENVIRONMENT})"
+currentBuild.description = "Update ${ENV_NAME} (${ENV_TYPE})"
 
 pipeline {
     agent {
@@ -10,13 +10,13 @@ pipeline {
     }
     parameters {
         choice(
-            name: 'ENVIRONMENT',
+            name: 'ENV_TYPE',
             choices: ['dev', 'uat'],
-            description: 'Choose environment'
+            description: 'Choose environment type.'
         )
         string(
             name: "ENV_NAME",
-            description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
+            description: "Unique name for the environment instance you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
         )
         booleanParam(
             name: "WAIT_APPROVAL",
@@ -34,20 +34,20 @@ pipeline {
         stage('Configure terraform') {
             steps {
                 sh """set +e;
-aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.tfvars\" --output json | jq .Parameter.Value -r > ${ENVIRONMENT}.tfvars
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}.tfvars\" --output json | jq .Parameter.Value -r > ${ENV_TYPE}.tfvars
                 """
                 sh """set +e;
-aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}.backend.tf\" --output json | jq .Parameter.Value -r > backend.tf
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}.backend.tf\" --output json | jq .Parameter.Value -r > backend.tf
                 """
                 sh """set +e;
-aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars\" --output json | jq .Parameter.Value -r > project.tfvars
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}/${ENV_NAME}.tfvars\" --output json | jq .Parameter.Value -r > project.tfvars
                 """
             }
         }
         stage('Terraform plan') {
             steps {
                 sh 'terraform init'
-                sh "terraform plan -var-file=\"${ENVIRONMENT}.tfvars\" -var-file=\"project.tfvars\" -out myplan"
+                sh "terraform plan -var-file=\"${ENV_TYPE}.tfvars\" -var-file=\"project.tfvars\" -out myplan"
             }
         }
         stage('Approval') {
@@ -71,7 +71,7 @@ aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV
         stage('Configure ansible') {
             steps {
                 sh """set +e;
-aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" --output json | jq .Parameter.Value -r > ansible/vars.yml
+aws ssm get-parameter --name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}/${ENV_NAME}.ansible.yml\" --output json | jq .Parameter.Value -r > ansible/vars.yml
                 """
             }
         }

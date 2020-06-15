@@ -1,5 +1,5 @@
 currentBuild.displayName = "#${BUILD_NUMBER}"
-currentBuild.description = "Create new testing app environment"
+currentBuild.description = "Create ${ENV_NAME} (${ENV_TYPE})"
 
 pipeline {
     agent {
@@ -10,13 +10,13 @@ pipeline {
     }
     parameters {
         choice(
-            name: 'ENVIRONMENT', 
+            name: 'ENV_TYPE', 
             choices: ['dev', 'uat'], 
-            description: 'Choose environment'
+            description: 'Choose environment type.'
         )
         string(
             name: "ENV_NAME",
-            description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
+            description: "Unique name for the environment instance you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
         )
     }
     environment {
@@ -46,14 +46,14 @@ pipeline {
         stage('Store environment configuration') {
             steps {
                 sh """aws ssm put-parameter \
---name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.tfvars\" \
---description \"Terraform tfvars for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
+--name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}/${ENV_NAME}.tfvars\" \
+--description \"Terraform tfvars for the ${ENV_NAME} environment on ${ENV_TYPE}\" \
 --value file://${ENV_NAME}.tfvars \
 --type String --overwrite
 """
                 sh """aws ssm put-parameter \
---name \"${PARAMETER_STORE_NAMESPACE}/${ENVIRONMENT}/${ENV_NAME}.ansible.yml\" \
---description \"Ansible config for the ${ENV_NAME} environment on ${ENVIRONMENT}\" \
+--name \"${PARAMETER_STORE_NAMESPACE}/${ENV_TYPE}/${ENV_NAME}.ansible.yml\" \
+--description \"Ansible config for the ${ENV_NAME} environment on ${ENV_TYPE}\" \
 --value file://${ENV_NAME}.yaml \
 --type String --overwrite
 """
@@ -62,7 +62,7 @@ pipeline {
         stage('Invoke update pipeline') {
             steps {
                 build job: 'Update environment', parameters: [
-                    [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: ENVIRONMENT],
+                    [$class: 'StringParameterValue', name: 'ENV_TYPE', value: ENV_TYPE],
                     [$class: 'StringParameterValue', name: 'ENV_NAME', value: ENV_NAME],
                     [$class: 'StringParameterValue', name: 'PARAMETER_STORE_NAMESPACE', value: PARAMETER_STORE_NAMESPACE],
                     [$class: 'BooleanParameterValue', name: 'WAIT_APPROVAL', value: false]
