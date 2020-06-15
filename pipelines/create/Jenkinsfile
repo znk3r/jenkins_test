@@ -64,7 +64,6 @@ pipeline {
                 build job: 'Update environment', parameters: [
                     [$class: 'StringParameterValue', name: 'ENV_TYPE', value: ENV_TYPE],
                     [$class: 'StringParameterValue', name: 'ENV_NAME', value: ENV_NAME],
-                    [$class: 'StringParameterValue', name: 'PARAMETER_STORE_NAMESPACE', value: PARAMETER_STORE_NAMESPACE],
                     [$class: 'BooleanParameterValue', name: 'WAIT_APPROVAL', value: false]
                 ]
             }
