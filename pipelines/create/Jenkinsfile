@@ -18,15 +18,12 @@ pipeline {
             name: "ENV_NAME",
             description: "Unique name for the environment you want to create. It'll be used to create unique resources and could be used as part of DNS entries."
         )
-        string(
-            name: "PARAMETER_STORE_NAMESPACE",
-            description: "Base SSM parameter store namespace where configurations are stored."
-        )
     }
     environment {
         AWS_ACCESS_KEY_ID = credentials('jenkins-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('jenkins-secret-key')
         AWS_DEFAULT_REGION = 'us-west-2'
+        PARAMETER_STORE_NAMESPACE = credentials('parameter-store-ns')
     }
     stages {
         stage('Create environment configuration') {

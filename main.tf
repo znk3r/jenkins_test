@@ -2,6 +2,9 @@ provider "aws" {
   region = "us-west-2"
 }
 
+#
+# DEFINE VARIABLES
+#
 variable "environment_name" {
   description = "Unique name for the environment"
   type        = string
@@ -37,6 +40,10 @@ variable "ssh_key_pair_name" {
   type        = string
 }
 
+
+#
+# CREATE UBUNTU INSTANCE
+#
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -103,6 +110,10 @@ resource "aws_instance" "test" {
   }
 }
 
+
+#
+# EXPORT ANSIBLE INVENTORY
+#
 resource "local_file" "ansible_inventory" {
   filename = "ansible/inventory.yml"
   content = templatefile("ansible_inventory.tmpl", {
